@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medisupply-dummy             # Nombre del objeto Deployment
+  labels:
+    app: medisupply-dummy            # Etiquetas (clave para selección/agrupación)
+spec:
+  replicas: 2                        # Cuántas réplicas (pods) quieres
+  selector:
+    matchLabels:
+      app: medisupply-dummy          # Debe coincidir con labels del template
+  revisionHistoryLimit: 5            # Cuántas revisiones mantiene para rollback
+  strategy:
+    type: RollingUpdate              # Estrategia de despliegue (actualizaciones sin downtime)
+    rollingUpdate:
+      maxUnavailable: 0              # No bajes ninguna réplica durante update
+      maxSurge: 1                    # Sube 1 réplica extra en el update
+  template:
+    metadata:
+      labels:
+        app: medisupply-dummy        # Etiquetas del pod (deben matchear el selector)
+    spec:
+      containers:
+        - name: app
+          image: 726264870413.dkr.ecr.us-east-1.amazonaws.com/medisupply:latest
+          imagePullPolicy: IfNotPresent   # Evita pulls innecesarios en el nodo
+          ports:
+            - containerPort: 8080         # Puerto donde escucha tu Flask/Gunicorn
+          env:                            # Variables de entorno de la app
+            - name: FLASK_ENV
+              value: "development"
+            - name: PORT
+              value: "8080"
+          readinessProbe:                 # Señal: “estoy listo para recibir tráfico”
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:                  # Señal: “sigo vivo”
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:                      # Requests/limits → planificación y protección
+            requests:
+              cpu: "200m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+
+### SERVICE (CLUSTERIP)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: medisupply-dummy-svc
+  labels:
+    app: medisupply-dummy
+spec:
+  type: ClusterIP                   # Crea un servicio interno (no expuesto fuera del cluster)
+  selector:
+    app: medisupply-dummy              # ¿Qué pods atiende este Service? (labels)
+  ports:
+    - name: http
+      port: 80                         # Puerto expuesto por el Service / LB
+      targetPort: 8080                 # Puerto del contenedor dentro del pod
+
+### INGRESS (ALB)
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: medisupply-ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/group.name: medisupply
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: medisupply-dummy-svc
+                port:
+                  number: 80

@@ -1,0 +1,38 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: miso-eks-default
+  region: us-east-1
+  version: "1.33"
+
+# Habilita OIDC (IRSA) y prepara la ServiceAccount del AWS Load Balancer Controller.
+# Se requiere instalar el ALB Controller en el cluster
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: aws-load-balancer-controller
+        namespace: kube-system
+      attachPolicyARNs:
+        - arn:aws:iam::726264870413:policy/AWSLoadBalancerControllerIAMPolicy
+
+vpc:
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: false
+
+managedNodeGroups:
+  - name: ng-app
+    instanceType: t3.large
+    desiredCapacity: 2          # Nodos iniciales
+    minSize: 2                  # Nunca menos de 2 (HA básica)
+    maxSize: 4                  # Tope del grupo (para Cluster Autoscaler)
+    privateNetworking: true     # Nodos en subredes PRIVADAS
+    ssh:
+      allow: false
+
+addons:
+  - name: vpc-cni
+  - name: kube-proxy
+  - name: coredns
