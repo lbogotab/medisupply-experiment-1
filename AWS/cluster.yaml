@@ -16,6 +16,10 @@ iam:
         namespace: kube-system
       attachPolicyARNs:
         - arn:aws:iam::726264870413:policy/AWSLoadBalancerControllerIAMPolicy
+    - metadata:
+        name: medisupply-sa
+        namespace: default
+      attachRoleARN: arn:aws:iam::726264870413:role/eks-pod # Acceso a DynamoDB
 
 vpc:
   clusterEndpoints:
