@@ -24,7 +24,7 @@ spec:
       containers:
         - name: app
           image: 726264870413.dkr.ecr.us-east-1.amazonaws.com/medisupply:latest
-          imagePullPolicy: IfNotPresent   # Evita pulls innecesarios en el nodo
+          imagePullPolicy: Always   # Evita pulls innecesarios en el nodo
           ports:
             - containerPort: 8080         # Puerto donde escucha tu Flask/Gunicorn
           envFrom:
@@ -105,6 +105,7 @@ data:
   FLASK_ENV: "development"
   PORT: "8080"
   DDB_TABLE: "medisupply-demo"
+  AWS_REGION: "us-east-1" 
 ---
 apiVersion: v1
 kind: Secret
