@@ -2,6 +2,8 @@ from flask import Blueprint, jsonify, request
 from botocore.exceptions import ClientError
 from app.clients.dynamo import get_table
 from app.clients.sqs import get_sqs_client
+import uuid
+import json
 
 bp = Blueprint("items", __name__)
 
@@ -22,12 +24,21 @@ def get_data():
 @bp.post("/orders/items")
 def put_item():
     data = request.get_json(force=True) or {}
+    # Asegura ID y tipo string (evita sobrescrituras por tipos distintos)
     if "id" not in data:
-        return jsonify({"error": "Campo 'id' es obligatorio"}), 400
+        # forzar que siempre se envíen desde el cliente
+        # return jsonify({"error": "Campo 'id' es obligatorio"}), 400
+        data["id"] = str(uuid.uuid4())
+    else:
+        data["id"] = str(data["id"])
     try:
-        # 1) Guardar en Dynamo
+        # 1) Guardar en Dynamo con protección anti-sobrescritura
         table = get_table()
-        table.put_item(Item=data)
+        table.put_item(
+            Item=data,
+            ConditionExpression="attribute_not_exists(#id)",
+            ExpressionAttributeNames={"#id": "id"},
+        )
 
         # 2) (Opcional) Publicar a SQS si está habilitado
         queued = None
@@ -41,14 +52,17 @@ def put_item():
                         "id": data["id"],
                         "payload": data,
                     }
-                    sqs.send_message(QueueUrl=url, MessageBody=jsonify(payload).data.decode())
+                    sqs.send_message(QueueUrl=url, MessageBody=json.dumps(payload))
                     queued = True
                 except Exception:
                     queued = False
 
         return jsonify({"ok": True, "saved": data, "queued": queued}), 201
     except ClientError as e:
-        return jsonify({"ok": False, "error": e.response.get("Error")}), 500
+        err = e.response.get("Error", {})
+        if err.get("Code") == "ConditionalCheckFailedException":
+            return jsonify({"ok": False, "error": "duplicate_id"}), 409
+        return jsonify({"ok": False, "error": err}), 500
 
 @bp.get("/orders/items/<item_id>")
 def get_item(item_id):

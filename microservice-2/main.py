@@ -10,7 +10,7 @@ import sys
 SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL", "https://sqs.us-east-1.amazonaws.com/726264870413/medisupply-events")
 AWS_REGION    = os.getenv("AWS_REGION", "us-east-1")
 WAIT_TIME     = int(os.getenv("SQS_WAIT_TIME", "20"))          # long polling
-MAX_MESSAGES  = int(os.getenv("SQS_MAX_MESSAGES", "5"))         # 1..10
+MAX_MESSAGES  = int(os.getenv("SQS_MAX_MESSAGES", "10"))         # 1..10
 VISIBILITY    = int(os.getenv("SQS_VISIBILITY_TIMEOUT", "60"))  # > tiempo de proceso
 
 app = Flask(__name__)
@@ -78,7 +78,7 @@ def _sqs_worker_loop():
 
                 # Lógica de negocio simulada
                 print(f"[sales-worker] Procesando mensaje: {body}")
-                time.sleep(10)  # Simula trabajo
+                time.sleep(1)  # Simula trabajo
 
                 # Borrar el mensaje de la cola
                 try:
