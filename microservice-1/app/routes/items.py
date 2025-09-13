@@ -5,11 +5,8 @@ from app.clients.sqs import get_sqs_client
 
 bp = Blueprint("items", __name__)
 
-@bp.get("/orders")
-def root():
-    return jsonify({"ok": True, "service": "medisupply-dummy"}), 200
 
-@bp.get("/orders/health")
+@bp.get("/health")
 def health():
     return jsonify({"status": "healthy"}), 200
 
