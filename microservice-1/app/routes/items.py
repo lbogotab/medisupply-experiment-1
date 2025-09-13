@@ -5,15 +5,15 @@ from app.clients.sqs import get_sqs_client
 
 bp = Blueprint("items", __name__)
 
-@bp.get("/")
+@bp.get("/orders")
 def root():
     return jsonify({"ok": True, "service": "medisupply-dummy"}), 200
 
-@bp.get("/health")
+@bp.get("/orders/health")
 def health():
     return jsonify({"status": "healthy"}), 200
 
-@bp.get("/example")
+@bp.get("/orders/example")
 def get_data():
     sample_data = {
         'id': 1,
@@ -22,7 +22,7 @@ def get_data():
     }
     return jsonify(sample_data), 201
 
-@bp.post("/items")
+@bp.post("/orders/items")
 def put_item():
     data = request.get_json(force=True) or {}
     if "id" not in data:
@@ -53,7 +53,7 @@ def put_item():
     except ClientError as e:
         return jsonify({"ok": False, "error": e.response.get("Error")}), 500
 
-@bp.get("/items/<item_id>")
+@bp.get("/orders/items/<item_id>")
 def get_item(item_id):
     try:
         table = get_table()
