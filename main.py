@@ -13,14 +13,14 @@ ddb = boto3.resource("dynamodb", region_name=AWS_REGION)
 table = ddb.Table(DDB_TABLE)
 
 # Config SQS (opcional, por ENV)
-SQS_QUEUE_URL = os.environ.get("SQS_QUEUE_URL", "https://sqs.us-east-1.amazonaws.com/726264870413/medisupply-events")
-sqs = boto3.client("sqs", region_name=AWS_REGION) if SQS_QUEUE_URL else None
+# SQS_QUEUE_URL = os.environ.get("SQS_QUEUE_URL", "https://sqs.us-east-1.amazonaws.com/726264870413/medisupply-events")
+# sqs = boto3.client("sqs", region_name=AWS_REGION) if SQS_QUEUE_URL else None
 
 @app.route('/example', methods=['GET'])
 def get_data():
   sample_data = {
       'id': 1,
-      'name': 'Sample Item',
+      'name': 'Sample Item sin SQS',
       'description': 'This is a sample item.'
   }
   return jsonify(sample_data), 201
@@ -44,20 +44,21 @@ def put_item():
     table.put_item(Item=data)
 
     #Intentar publicar evento en SQS
-    queued = None
-    if SQS_QUEUE_URL and sqs:
-      try:
-        message = {
-          "type": "order_created",
-          "id": data["id"],
-          "payload": data
-        }
-        sqs.send_message(QueueUrl=SQS_QUEUE_URL, MessageBody=json.dumps(message))
-        queued = True
-      except Exception:
-        queued = False
+    # queued = None
+    # if SQS_QUEUE_URL and sqs:
+    #   try:
+    #     message = {
+    #       "type": "order_created",
+    #       "id": data["id"],
+    #       "payload": data
+    #     }
+    #     sqs.send_message(QueueUrl=SQS_QUEUE_URL, MessageBody=json.dumps(message))
+    #     queued = True
+    #   except Exception:
+    #     queued = False
 
-    return jsonify({"ok": True, "saved": data, "queued": queued}), 201
+    # return jsonify({"ok": True, "saved": data, "queued": queued}), 201
+    return jsonify({"ok": True, "saved": data}), 201
 
   except ClientError as e:
     return jsonify({"ok": False, "error": e.response["Error"]}), 500
