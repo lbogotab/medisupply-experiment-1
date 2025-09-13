@@ -19,7 +19,9 @@ iam:
     - metadata:
         name: medisupply-sa
         namespace: default
-      attachRoleARN: arn:aws:iam::726264870413:role/eks-pod # Acceso a DynamoDB
+      roleName: medisupply-sa-role              # eksctl crea/actualiza este rol al reiniciar
+      attachPolicyARNs:
+        - arn:aws:iam::726264870413:policy/AWS-POD-Policy  # Politica propia de DynamoDB
 
 vpc:
   clusterEndpoints:

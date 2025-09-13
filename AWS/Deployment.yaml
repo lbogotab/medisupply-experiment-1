@@ -105,7 +105,8 @@ data:
   FLASK_ENV: "development"
   PORT: "8080"
   DDB_TABLE: "medisupply-demo"
-  AWS_REGION: "us-east-1" 
+  AWS_REGION: "us-east-1"
+  SQS_QUEUE_URL: "https://sqs.us-east-1.amazonaws.com/726264870413/medisupply-events"
 ---
 apiVersion: v1
 kind: Secret
