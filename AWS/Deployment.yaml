@@ -73,6 +73,78 @@ spec:
       port: 80                         # Puerto expuesto por el Service / LB
       targetPort: 8080                 # Puerto del contenedor dentro del pod
 
+### SECOND DEPLOYMENT (MICRO2)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medisupply-micro2
+  labels:
+    app: medisupply-micro2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: medisupply-micro2
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: medisupply-micro2
+    spec:
+      serviceAccountName: medisupply-sa
+      containers:
+        - name: app
+          image: 726264870413.dkr.ecr.us-east-1.amazonaws.com/medisupply-2:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+
+### SECOND SERVICE (MICRO2)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: medisupply-micro2-svc
+  labels:
+    app: medisupply-micro2
+spec:
+  type: ClusterIP
+  selector:
+    app: medisupply-micro2
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+
 ### INGRESS (ALB)
 ---
 apiVersion: networking.k8s.io/v1
@@ -89,7 +161,14 @@ spec:
   rules:
     - http:
         paths:
-          - path: /
+          - path: /sales
+            pathType: Prefix
+            backend:
+              service:
+                name: medisupply-micro2-svc
+                port:
+                  number: 80
+          - path: /orders
             pathType: Prefix
             backend:
               service:

@@ -1,4 +1,4 @@
-name: Build & Push to ECR
+name: Build & Push Micro2 to ECR
 
 on:
   push:
@@ -9,11 +9,11 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: medisupply
+  ECR_REPOSITORY: medisupply-2
 
 jobs:
   build-and-push:
-    if: contains(github.event.head_commit.message, 'ECR')
+    if: contains(github.event.head_commit.message, 'ECR2')
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -27,7 +27,7 @@ jobs:
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: arn:aws:iam::726264870413:role/GitHubActions-ECR
-          role-session-name: medisupply-build
+          role-session-name: medisupply-micro2-build
 
       - name: Login to Amazon ECR
         id: ecr
@@ -49,10 +49,8 @@ jobs:
       - name: Build & Push
         uses: docker/build-push-action@v6
         with:
-          context: ./microservice-1
+          context: ./microservice-2
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:buildcache
-          cache-to: type=registry,ref=${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:buildcache,mode=max
