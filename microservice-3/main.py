@@ -20,9 +20,9 @@ def health():
 def get_example_product():
     example_product = {
         "id": "example",
-        "name": "Example Product",
+        "name": "Example Product AAA",
         "description": "This is an example product",
-        "price": 9.99
+        "price": 666
     }
     return jsonify({"ok": True, "item": example_product})
 
