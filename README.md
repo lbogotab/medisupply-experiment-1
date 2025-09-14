@@ -293,3 +293,23 @@ Se monitorearon métricas como bytes procesados para el VPC Endpoint de SQS, con
 - La configuración de VPC Endpoints para DynamoDB y SQS mejoró la seguridad y latencia.
 - EventBridge facilitó la integración y comunicación entre microservicios.
 - El sistema soporta 400 peticiones por minuto sin necesidad de escalar a más de dos pods, demostrando eficiencia en la arquitectura.
+
+---
+
+# Experimento MediSupply 2
+
+El propósito del Experimento 2 es validar la latencia base, la latencia bajo condiciones de estrés, el throughput y la consistencia eventual utilizando el microservicio de productos que consulta la tabla DynamoDB mirror. Este experimento busca asegurar que el sistema mantenga un rendimiento adecuado y una consistencia aceptable en escenarios de alta carga y replicación de datos.
+
+Para ello, se incluyó el Microservicio 3 – Gestión de productos, creado específicamente para consultar información desde la tabla `medisupply-demo-mirror`. Este microservicio aprovecha la infraestructura ya desplegada en el Experimento 1 y permite validar escenarios de consistencia eventual en la replicación de datos entre tablas DynamoDB.
+
+## Arquitectura Experimento 2
+
+
+
+## Conclusiones Experimiento 2
+
+- Validación de latencia base (ASR004, ASR005): Con 10 usuarios concurrentes, las métricas de JMeter confirmaron que el sistema mantuvo tiempos de respuesta inferiores a los umbrales definidos (P50 ≤ 300 ms, P95 ≤ 800 ms y P99 ≤ 1000 ms).
+- Latencia bajo estrés (ASR004): En pruebas con 100 usuarios concurrentes, el sistema mantuvo un P95 por debajo de 1000 ms durante toda la ejecución, asegurando estabilidad bajo carga elevada.
+- Consistencia eventual (ASR006): Se comprobó que el 99.9% de los productos fueron consultables en ≤1 s después de su inserción o actualización, confirmando el correcto funcionamiento de la tabla espejo en DynamoDB y el patrón de replicación adoptado.
+- Disponibilidad (ASR003): Todas las pruebas reportaron una tasa de error menor al 0.1%, lo que valida la robustez de la arquitectura y el diseño distribuido de EKS con múltiples zonas de disponibilidad.
+- Throughput (ASR006): Se alcanzó un rendimiento de más de 500 consultas por minuto por pod, demostrando que el sistema es eficiente y escalable en escenarios de alta concurrencia.
