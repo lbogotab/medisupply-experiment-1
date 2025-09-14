@@ -303,7 +303,7 @@ El propósito del Experimento 2 es validar la latencia base, la latencia bajo co
 Para ello, se incluyó el Microservicio 3 – Gestión de productos, creado específicamente para consultar información desde la tabla `medisupply-demo-mirror`. Este microservicio aprovecha la infraestructura ya desplegada en el Experimento 1 y permite validar escenarios de consistencia eventual en la replicación de datos entre tablas DynamoDB.
 
 ## Arquitectura Experimento 2
-
+<img width="2534" height="1650" alt="Proyecto Integrador - s6 - experimento 2" src="https://github.com/user-attachments/assets/6308acab-e7f9-49e9-853f-231628ebe776" />
 
 
 ## Conclusiones Experimiento 2
