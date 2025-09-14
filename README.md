@@ -2,6 +2,8 @@
 
 El Experimento 1 busca validar la capacidad de la arquitectura de MediSupply desplegada en Amazon EKS para sostener escenarios de carga extrema, asegurando que el sistema responda de manera estable ante picos de 400 pedidos por minuto sin pérdida de información. El propósito es comprobar la efectividad del autoscaling de pods y nodos, así como la resiliencia de componentes críticos como API Gateway, DynamoDB y SQS, manteniendo tiempos de respuesta inferiores a un segundo y disponibilidad continua.
 
+<img width="2529" height="1585" alt="Proyecto Integrador - s6 - experimento 1" src="https://github.com/user-attachments/assets/bdb512cd-1d09-4a57-ae6a-2fea557e6ffa" />
+
 ## 1. Creación del cluster EKS
 
 Para iniciar el experimento, se creó un cluster de Kubernetes gestionado por EKS con `eksctl`, configurando una VPC con subredes públicas y privadas, así como grupos de nodos gestionados.
