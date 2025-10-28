@@ -9,7 +9,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: medisupply
+  ECR_REPOSITORY: medisupply-testing-1
 
 jobs:
   build-and-push:
