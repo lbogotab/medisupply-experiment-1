@@ -24,7 +24,7 @@ def get_data():
 @bp.post("/orders/items")
 def put_item():
     data = request.get_json(force=True) or {}
-    # Asegura ID y tipo string (evita sobrescrituras por tipos distintos)
+    # Asegura ID y tipo string (evita sobrescrituras por tipos distintos) T
     if "id" not in data:
         # forzar que siempre se envíen desde el cliente
         # return jsonify({"error": "Campo 'id' es obligatorio"}), 400
